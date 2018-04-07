@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ksuid
@@ -61,6 +62,12 @@ namespace Ksuid
 		private byte[] mergedByteArray;
 
 		/// <summary>
+		/// Since the instance identifier is immutable, we only actually convert it to a
+		/// friendly string once. This stores that.
+		/// </summary>
+		private string friendlyStr;
+
+		/// <summary>
 		/// Gets the merged scheme and data as a byte array.
 		/// </summary>
 		public byte[] ToByteArray()
@@ -73,6 +80,45 @@ namespace Ksuid
 			}
 
 			return mergedByteArray;
+		}
+
+		/// <summary>
+		///
+		/// </summary>
+		public string ToFriendlyString()
+		{
+			if (friendlyStr != null)
+				return friendlyStr;
+
+			var sb = new StringBuilder();
+
+			sb.AppendLine($"Instance scheme: {Scheme.ToString()} ({(int) Scheme})");
+			sb.AppendLine($"Instance data:");
+
+			switch(Scheme)
+			{
+				case InstanceScheme.MacAndPID:
+					var macAddr = new byte[6];
+					var pid = new byte[2];
+
+					Array.Copy(Bytes, 0, macAddr, 0, 6);
+					Array.Copy(Bytes, 5, pid, 0, 2);
+
+					if (BitConverter.IsLittleEndian)
+						Array.Reverse(pid);
+
+					sb.AppendLine($"  Machine addr: {BitConverter.ToString(macAddr).ToLower()}");
+					sb.AppendLine($"  Process id: {BitConverter.ToInt16(pid, 0)}");
+					break;
+
+				case InstanceScheme.Random:
+				case InstanceScheme.DockerCont:
+				default:
+					sb.AppendLine($"  Data: {BitConverter.ToString(Bytes).ToLower()}");
+					break;
+			}
+
+			return friendlyStr = sb.ToString();
 		}
 
 		/// <summary>

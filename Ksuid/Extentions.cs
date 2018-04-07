@@ -8,7 +8,7 @@ namespace Ksuid
 		/// <summary>
 		/// The DateTime representation of the Unix epoch.
 		/// </summary>
-		private static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+		internal static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
 
 		/// <summary>
 		/// Gets the unix timestamp representation of the specified time.

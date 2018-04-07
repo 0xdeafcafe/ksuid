@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Ksuid
@@ -53,6 +54,12 @@ namespace Ksuid
 		private string str;
 
 		/// <summary>
+		/// Since the id is immutable, we only actually convert it to a friendly string
+		/// once. This stores that.
+		/// </summary>
+		private string friendlyStr;
+
+		/// <summary>
 		/// Gets the string representation of the ksuid.
 		/// </summary>
 		public override string ToString()
@@ -78,9 +85,28 @@ namespace Ksuid
 			Array.Copy(instance, 0, decoded, 8, 9);
 			Array.Copy(sequenceId, 0, decoded, 17, 4);
 
-			str = prefix + Base62.Encode(decoded).PadLeft(Constants.EncodedLength, '0');
+			return str = prefix + Base62.Encode(decoded).PadLeft(Constants.EncodedLength, '0');
+		}
 
-			return str;
+		/// <summary>
+		///
+		/// </summary>
+		/// <returns></returns>
+		public string ToFriendlyString()
+		{
+			if (friendlyStr != null)
+				return friendlyStr;
+
+			var sb = new StringBuilder();
+			var time = Extensions.UnixEpoch.AddSeconds(Timestamp);
+
+			sb.AppendLine($"Environment: {Environment}");
+			sb.AppendLine($"Resource: {Resource}");
+			sb.AppendLine($"Timestamp: {time.ToLongDateString()} {time.ToLongTimeString()}");
+			sb.AppendLine(InstanceIdentifier.ToFriendlyString());
+			sb.AppendLine($"Sequence Id: {SequenceId}");
+
+			return friendlyStr = sb.ToString();
 		}
 
 		/// <summary>
