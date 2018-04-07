@@ -1,9 +1,5 @@
 using System;
-using System.Diagnostics;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Ksuid
 {
@@ -17,7 +13,7 @@ namespace Ksuid
 		public Node(string environment = "prod", InstanceIdentifier instanceIdentifier = null)
 		{
 			if (instanceIdentifier == null)
-				instanceIdentifier = GetInstanceIdentifier();
+				instanceIdentifier = InstanceIdentifier.GetInstanceIdentifier();
 
 			Environment = environment;
 			InstanceIdentifier = instanceIdentifier;
@@ -62,6 +58,8 @@ namespace Ksuid
 		/// </summary>
 		private UInt64 lastTimestamp = 0;
 
+		private Mutex mutex = new Mutex();
+
 		/// <summary>
 		/// Generates a new Ksuid.
 		/// </summary>
@@ -74,6 +72,8 @@ namespace Ksuid
 			if (resource == "")
 				throw new ArgumentException(nameof(resource), $"{nameof(resource)} cannot be empty.");
 
+			mutex.WaitOne();
+
 			var now = DateTime.UtcNow.ToUnixTime();
 
 			if (lastTimestamp == now)
@@ -84,6 +84,8 @@ namespace Ksuid
 				currentSequence = 0;
 			}
 
+			mutex.ReleaseMutex();
+
 			return new Id(
 				Environment,
 				resource,
@@ -91,59 +93,6 @@ namespace Ksuid
 				InstanceIdentifier,
 				currentSequence
 			);
-		}
-
-		/// <summary>
-		/// Generates an instance identifier. Tries to call `GetMacPidInstance`, and
-		/// fallsback to `GetRandomInstance`.
-		/// </summary>
-		public static InstanceIdentifier GetInstanceIdentifier()
-		{
-			var macPidInstance = GetMacPidInstance();
-			if (macPidInstance != null)
-				return macPidInstance;
-
-			return GetRandomInstance();
-		}
-
-		/// <summary>
-		/// Gets an instance identifier of the machines address and process id.
-		/// </summary>
-		public static InstanceIdentifier GetMacPidInstance()
-		{
-			var machineAddress = NetworkInterface
-				.GetAllNetworkInterfaces()
-				.Where(nic => nic.OperationalStatus == OperationalStatus.Up && nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-				.Select(nic => nic.GetPhysicalAddress().GetAddressBytes())
-				.FirstOrDefault();
-
-			if (machineAddress == null)
-				return null;
-
-			var pid = Process.GetCurrentProcess().Id % Math.Pow(2, 16);
-			var pidBytes = BitConverter.GetBytes(pid);
-			var bytes = new byte[8];
-
-			if (BitConverter.IsLittleEndian)
-				Array.Reverse(pidBytes);
-
-			Array.Copy(machineAddress, bytes, 6);
-			Array.Copy(pidBytes, 0, bytes, 6, 2);
-
-			return new InstanceIdentifier(InstanceScheme.MacAndPID, bytes);
-		}
-
-		/// <summary>
-		/// Gets an instance identifier of 8 random bytes.
-		/// </summary>
-		internal static InstanceIdentifier GetRandomInstance()
-		{
-			using (var rng = new RNGCryptoServiceProvider())
-			{
-				var randomData = new byte[0x08];
-				rng.GetBytes(randomData);
-				return new InstanceIdentifier(InstanceScheme.Random, randomData);
-			}
 		}
 	}
 }

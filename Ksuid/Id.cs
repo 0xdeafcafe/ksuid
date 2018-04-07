@@ -75,10 +75,10 @@ namespace Ksuid
 			}
 
 			Array.Copy(timestamp, decoded, 8);
-			Array.Copy(instance, 0, decoded, 7, 9);
-			Array.Copy(sequenceId, 0, decoded, 16, 4);
+			Array.Copy(instance, 0, decoded, 8, 9);
+			Array.Copy(sequenceId, 0, decoded, 17, 4);
 
-			str = prefix + Base62.Encode(decoded).PadLeft(Constants.EncodedLength);
+			str = prefix + Base62.Encode(decoded).PadLeft(Constants.EncodedLength, '0');
 
 			return str;
 		}
@@ -91,16 +91,14 @@ namespace Ksuid
 		{
 			var parts = splitPrefix(input);
 			var decoded = Base62.Decode(parts.payload);
-			var decodedTrimmed = new byte[Constants.DecodedLength];
-			Array.Copy(decoded, decoded.Length - Constants.DecodedLength, decodedTrimmed, 0, Constants.DecodedLength);
 
 			var timestamp = new byte[8];
 			var instance = new byte[9];
 			var sequence = new byte[4];
 
-			Array.Copy(decodedTrimmed, timestamp, 8);
-			Array.Copy(decodedTrimmed, 7, instance, 0, 9);
-			Array.Copy(decodedTrimmed, 16, sequence, 0, 4);
+			Array.Copy(decoded, timestamp, 8);
+			Array.Copy(decoded, 8, instance, 0, 9);
+			Array.Copy(decoded, 17, sequence, 0, 4);
 
 			if (BitConverter.IsLittleEndian)
 			{
@@ -112,7 +110,7 @@ namespace Ksuid
 				parts.environment,
 				parts.resource,
 				BitConverter.ToUInt64(timestamp, 0),
-				new InstanceIdentifier(null),
+				new InstanceIdentifier(instance),
 				BitConverter.ToUInt32(sequence, 0)
 			);
 		}
@@ -123,8 +121,10 @@ namespace Ksuid
 			if (!match.Success || match.Groups.Count != 4)
 				throw new FormatException("Ksuid format is invalid");
 
+			var env = match.Groups[1].Value;
+
 			return (
-				match.Groups[1].Value ?? "prod",
+				String.IsNullOrEmpty(env) ? "prod" : env,
 				match.Groups[2].Value,
 				match.Groups[3].Value
 			);

@@ -1,318 +1,182 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace Ksuid
 {
-	/// <summary>
-	/// Utility that read and write bits in byte array
-	/// </summary>
-	public class BitStream : Stream
+	internal static class Base62
 	{
-		private byte[] Source { get; set; }
-
-		/// <summary>
-		/// Initialize the stream with capacity
-		/// </summary>
-		/// <param name="capacity">Capacity of the stream</param>
-		public BitStream(int capacity)
+		static Base62()
 		{
-			this.Source = new byte[capacity];
+			CharacterSet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz".ToCharArray();
 		}
 
-		/// <summary>
-		/// Initialize the stream with a source byte array
-		/// </summary>
-		/// <param name="source"></param>
-		public BitStream(byte[] source)
-		{
-			this.Source = source;
-		}
+		public static char[] CharacterSet { get; private set; }
 
-		public override bool CanRead
-		{
-			get { return true; }
-		}
+		const int offsetUppercase = 10;
 
-		public override bool CanSeek
-		{
-			get { return true; }
-		}
-
-		public override bool CanWrite
-		{
-			get { return true; }
-		}
-
-		public override void Flush()
-		{
-			throw new NotImplementedException();
-		}
-
-		/// <summary>
-		/// Bit length of the stream
-		/// </summary>
-		public override long Length
-		{
-			get { return Source.Length * 8; }
-		}
-
-		/// <summary>
-		/// Bit position of the stream
-		/// </summary>
-		public override long Position { get; set; }
-
-		/// <summary>
-		/// Read the stream to the buffer
-		/// </summary>
-		/// <param name="buffer">Buffer</param>
-		/// <param name="offset">Offset bit start position of the stream</param>
-		/// <param name="count">Number of bits to read</param>
-		/// <returns>Number of bits read</returns>
-		public override int Read(byte[] buffer, int offset, int count)
-		{
-			// Temporary position cursor
-			long tempPos = this.Position;
-			tempPos += offset;
-
-			// Buffer byte position and in-byte position
-			int readPosCount = 0, readPosMod = 0;
-
-			// Stream byte position and in-byte position
-			long posCount = tempPos >> 3;
-			int posMod = (int)(tempPos - ((tempPos >> 3) << 3));
-
-			while (tempPos < this.Position + offset + count && tempPos < this.Length)
-			{
-				// Copy the bit from the stream to buffer
-				if ((((int)this.Source[posCount]) & (0x1 << (7 - posMod))) != 0)
-				{
-					buffer[readPosCount] = (byte)((int)(buffer[readPosCount]) | (0x1 << (7 - readPosMod)));
-				}
-				else
-				{
-					buffer[readPosCount] = (byte)((int)(buffer[readPosCount]) & (0xffffffff - (0x1 << (7 - readPosMod))));
-				}
-
-				// Increment position cursors
-				tempPos++;
-				if (posMod == 7)
-				{
-					posMod = 0;
-					posCount++;
-				}
-				else
-				{
-					posMod++;
-				}
-				if (readPosMod == 7)
-				{
-					readPosMod = 0;
-					readPosCount++;
-				}
-				else
-				{
-					readPosMod++;
-				}
-			}
-			int bits = (int)(tempPos - this.Position - offset);
-			this.Position = tempPos;
-			return bits;
-		}
-
-		/// <summary>
-		/// Set up the stream position
-		/// </summary>
-		/// <param name="offset">Position</param>
-		/// <param name="origin">Position origin</param>
-		/// <returns>Position after setup</returns>
-		public override long Seek(long offset, SeekOrigin origin)
-		{
-			switch (origin)
-			{
-				case (SeekOrigin.Begin):
-					{
-						this.Position = offset;
-						break;
-					}
-				case (SeekOrigin.Current):
-					{
-						this.Position += offset;
-						break;
-					}
-				case (SeekOrigin.End):
-					{
-						this.Position = this.Length + offset;
-						break;
-					}
-			}
-			return this.Position;
-		}
-
-		public override void SetLength(long value)
-		{
-			throw new NotImplementedException();
-		}
-
-		/// <summary>
-		/// Write from buffer to the stream
-		/// </summary>
-		/// <param name="buffer"></param>
-		/// <param name="offset">Offset start bit position of buffer</param>
-		/// <param name="count">Number of bits</param>
-		public override void Write(byte[] buffer, int offset, int count)
-		{
-			// Temporary position cursor
-			long tempPos = this.Position;
-
-			// Buffer byte position and in-byte position
-			int readPosCount = offset >> 3, readPosMod = offset - ((offset >> 3) << 3);
-
-			// Stream byte position and in-byte position
-			long posCount = tempPos >> 3;
-			int posMod = (int)(tempPos - ((tempPos >> 3) << 3));
-
-			while (tempPos < this.Position + count && tempPos < this.Length)
-			{
-				// Copy the bit from buffer to the stream
-				if ((((int)buffer[readPosCount]) & (0x1 << (7 - readPosMod))) != 0)
-				{
-					this.Source[posCount] = (byte)((int)(this.Source[posCount]) | (0x1 << (7 - posMod)));
-				}
-				else
-				{
-					this.Source[posCount] = (byte)((int)(this.Source[posCount]) & (0xffffffff - (0x1 << (7 - posMod))));
-				}
-
-				// Increment position cursors
-				tempPos++;
-				if (posMod == 7)
-				{
-					posMod = 0;
-					posCount++;
-				}
-				else
-				{
-					posMod++;
-				}
-				if (readPosMod == 7)
-				{
-					readPosMod = 0;
-					readPosCount++;
-				}
-				else
-				{
-					readPosMod++;
-				}
-			}
-			this.Position = tempPos;
-		}
-	}
-
-	public static class Base62
-	{
-		public static string CharacterSet { get; } = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+		const int offsetLowercase = 36;
 
 		/// <summary>
 		/// Convert a byte array
 		/// </summary>
 		/// <param name="original">Byte array</param>
 		/// <returns>Base62 string</returns>
-		public static string Encode(byte[] original)
+		public static string Encode(byte[] src)
 		{
-			var sb = new StringBuilder();
-			var stream = new BitStream(original);
+			const ushort dstBase = 62;
+			var digits = new List<int> { 0 };
 
-			// Only read 6-bit at a time
-			var read = new byte[1];
-			while (true)
+			foreach (var s in src)
 			{
-				read[0] = 0;
-				var length = stream.Read(read, 0, 6); // Try to read 6 bits
-				if (length == 6) // Not reaching the end
+				var carry = (int)s;
+
+				for (var j = 0; j < digits.Count; j++)
 				{
-					if ((int)(read[0] >> 3) == 0x1f) // First 5-bit is 11111
-					{
-						sb.Append(CharacterSet[61]);
-						stream.Seek(-1, SeekOrigin.Current); // Leave the 6th bit to next group
-					}
-					else if ((int)(read[0] >> 3) == 0x1e) // First 5-bit is 11110
-					{
-						sb.Append(CharacterSet[60]);
-						stream.Seek(-1, SeekOrigin.Current);
-					}
-					else // Encode 6-bit
-						sb.Append(CharacterSet[(int)(read[0] >> 2)]);
+					carry += digits[j] << 8;
+					digits[j] = carry % dstBase;
+					carry = (carry / dstBase) | 0;
 				}
-				else if (length == 0) // Reached the end completely
+
+				while(carry > 0)
 				{
-					break;
-				}
-				else // Reached the end with some bits left
-				{
-					// Padding 0s to make the last bits to 6 bit
-					sb.Append(CharacterSet[(int)(read[0] >> (int)(8 - length))]);
-					break;
+					digits.Add(carry % dstBase);
+					carry = (carry / dstBase) | 0;
 				}
 			}
-			return sb.ToString();
+
+			var dst = new char[digits.Count];
+
+			for (var i = 0; i < digits.Count; i++)
+				dst[i] = CharacterSet[digits[i]];
+
+			Array.Reverse(dst);
+
+			return new string(dst);
+		}
+
+		private static int[] BaseConvert(byte[] source, int sourceBase, int targetBase)
+		{
+			var result = new List<int>();
+			int count = 0;
+			while ((count = source.Length) > 0)
+			{
+				var quotient = new List<int>();
+				int remainder = 0;
+				for (var i = 0; i != count; i++)
+				{
+					int accumulator = source[i] + remainder * sourceBase;
+					int digit = accumulator / targetBase;
+					remainder = accumulator % targetBase;
+					if (quotient.Count > 0 || digit > 0)
+					{
+						quotient.Add(digit);
+					}
+				}
+
+				result.Insert(0, remainder);
+				source = Array.ConvertAll(quotient.ToArray(), q => (byte)q);
+			}
+
+			return result.ToArray();
 		}
 
 		/// <summary>
 		/// Convert a Base62 string to byte array
 		/// </summary>
-		/// <param name="base62">Base62 string</param>
+		/// <param name="src">A Base62 string encoded string.</param>
 		/// <returns>Byte array</returns>
-		public static byte[] Decode(string base62)
+		public static byte[] Decode(string src)
 		{
-			// Character count
-			int count = 0;
+			const ushort srcBase = 62;
+			const ulong dstBase = 4294967296;
 
-			// Set up the BitStream
-			var stream = new BitStream(base62.Length * 6 / 8);
-
-			foreach (char c in base62)
+			var bytes = Encoding.ASCII.GetBytes(src);
+			var parts = new byte[Constants.EncodedLength]
 			{
-				// Look up coding table
-				int index = CharacterSet.IndexOf(c);
+				base62Value(bytes[0]),
+				base62Value(bytes[1]),
+				base62Value(bytes[2]),
+				base62Value(bytes[3]),
+				base62Value(bytes[4]),
+				base62Value(bytes[5]),
+				base62Value(bytes[6]),
+				base62Value(bytes[7]),
+				base62Value(bytes[8]),
+				base62Value(bytes[9]),
 
-				// If end is reached
-				if (count == base62.Length - 1)
+				base62Value(bytes[10]),
+				base62Value(bytes[11]),
+				base62Value(bytes[12]),
+				base62Value(bytes[13]),
+				base62Value(bytes[14]),
+				base62Value(bytes[15]),
+				base62Value(bytes[16]),
+				base62Value(bytes[17]),
+				base62Value(bytes[18]),
+				base62Value(bytes[19]),
+
+				base62Value(bytes[20]),
+				base62Value(bytes[21]),
+				base62Value(bytes[22]),
+				base62Value(bytes[23]),
+				base62Value(bytes[24]),
+				base62Value(bytes[25]),
+				base62Value(bytes[26]),
+				base62Value(bytes[27]),
+				base62Value(bytes[28]),
+			};
+
+			var n = Constants.DecodedLength;
+			var dst = new byte[n];
+			var bp = new byte[parts.Length];
+			Array.Copy(parts, bp, parts.Length);
+
+			while (bp.Length > 0)
+			{
+				var quotient = new List<byte>();
+				var remainder = (ulong)0;
+
+				foreach (var c in bp)
 				{
-					// Check if the ending is good
-					int mod = (int)(stream.Position % 8);
-					if (mod == 0)
-						throw new InvalidDataException("an extra character was found");
+					var value = (ulong)c + (ulong)(remainder) * srcBase;
+					var digit = value / dstBase;
+					remainder = value % dstBase;
 
-					if ((index >> (8 - mod)) > 0)
-						throw new InvalidDataException("invalid ending character was found");
+					if (quotient.Count != 0 || digit != 0)
+						quotient.Add((byte)digit);
+				}
 
-					stream.Write(new byte[] { (byte)(index << mod) }, 0, 8 - mod);
-				}
-				else
-				{
-					// If 60 or 61 then only write 5 bits to the stream, otherwise 6 bits.
-					if (index == 60)
-					{
-						stream.Write(new byte[] { 0xf0 }, 0, 5);
-					}
-					else if (index == 61)
-					{
-						stream.Write(new byte[] { 0xf8 }, 0, 5);
-					}
-					else
-					{
-						stream.Write(new byte[] { (byte)index }, 2, 6);
-					}
-				}
-				count++;
+				if (n < 4)
+					throw new InvalidOperationException("Output buffer is too short.");
+
+				dst[n - 4] = (byte)(remainder >> 24);
+				dst[n - 3] = (byte)(remainder >> 16);
+				dst[n - 2] = (byte)(remainder >> 8);
+				dst[n - 1] = (byte)(remainder);
+				n -= 4;
+				bp = quotient.ToArray();
 			}
 
-			// Dump out the bytes
-			var result = new byte[stream.Position / 8];
-			stream.Seek(0, SeekOrigin.Begin);
-			stream.Read(result, 0, result.Length * 8);
-			return result;
+			return dst;
+		}
+
+		/// <summary>
+		/// Gets the base62 value of a given byte.
+		/// </summary>
+		/// <param name="digit">The digit as a byte.</param>
+		private static byte base62Value(byte digit)
+		{
+			var casted = (int)digit;
+
+			if (casted >= '0' && casted <= '9')
+				return (byte)(casted - '0');
+
+			if (casted >= 'A' && casted <= 'Z')
+				return (byte)(offsetUppercase + (casted - 'A'));
+
+			return (byte)(offsetLowercase + (casted - 'a'));
 		}
 	}
 }
