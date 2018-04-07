@@ -6,6 +6,11 @@ namespace Ksuid
 	public class Node
 	{
 		/// <summary>
+		/// This is a singleton of the Node, initialized to the `prod` environment.
+		/// </summary>
+		public static Node Singleton = new Node();
+
+		/// <summary>
 		/// Creates a new Node for generating Ksuid's.
 		/// </summary>
 		/// <param name="environment">The environment of the Ksuid.</param>
