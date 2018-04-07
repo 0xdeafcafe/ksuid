@@ -60,32 +60,6 @@ namespace Ksuid
 			return new string(dst);
 		}
 
-		private static int[] BaseConvert(byte[] source, int sourceBase, int targetBase)
-		{
-			var result = new List<int>();
-			int count = 0;
-			while ((count = source.Length) > 0)
-			{
-				var quotient = new List<int>();
-				int remainder = 0;
-				for (var i = 0; i != count; i++)
-				{
-					int accumulator = source[i] + remainder * sourceBase;
-					int digit = accumulator / targetBase;
-					remainder = accumulator % targetBase;
-					if (quotient.Count > 0 || digit > 0)
-					{
-						quotient.Add(digit);
-					}
-				}
-
-				result.Insert(0, remainder);
-				source = Array.ConvertAll(quotient.ToArray(), q => (byte)q);
-			}
-
-			return result.ToArray();
-		}
-
 		/// <summary>
 		/// Convert a Base62 string to byte array
 		/// </summary>
