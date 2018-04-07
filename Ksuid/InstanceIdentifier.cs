@@ -148,7 +148,7 @@ namespace Ksuid
 			if (machineAddress == null)
 				return null;
 
-			var pid = Process.GetCurrentProcess().Id % Math.Pow(2, 16);
+			ushort pid = (ushort)(Process.GetCurrentProcess().Id % Math.Pow(2, 16));
 			var pidBytes = BitConverter.GetBytes(pid);
 			var bytes = new byte[8];
 
