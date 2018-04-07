@@ -7,7 +7,7 @@ namespace Ksuid
 	{
 		internal static void ValidatePrefix(string field, string value)
 		{
-			if (!Constants.PrefixRegex.Match(value).Success)
+			if (!Constants.PrefixRegex.IsMatch(value))
 				throw new ArgumentException(field, $"{field} is not valid. It must match [a-z\\d]+");
 		}
 	}

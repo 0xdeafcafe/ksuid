@@ -20,7 +20,7 @@ namespace Ksuid
 		/// environment, resource, and payload.
 		/// </summary>
 		public static readonly Regex KsuidRegex = new Regex(
-			@"(?:(?<environment>[a-z\d]+)_)?(?:(?<resource>[a-z\d]+)_{1})(?<payload>[a-zA-Z\d]{29})",
+			@"^(?:(?<environment>[a-z\d]+)_)?(?:(?<resource>[a-z\d]+)_{1})(?<payload>[a-zA-Z\d]{29})$",
 			RegexOptions.Compiled
 		);
 
@@ -28,7 +28,7 @@ namespace Ksuid
 		/// The compiled regex for validating the prefix of a ksuid.
 		/// </summary>
 		public static readonly Regex PrefixRegex = new Regex(
-			@"[a-z\d]+",
+			@"^[a-z\d]+$",
 			RegexOptions.Compiled
 		);
 	}
