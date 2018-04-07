@@ -1,6 +1,8 @@
 # Ksuid
 
-Handles parsing and generating of Cuvva standard K-sortable unique identifiers, also know as a `ksuid`. This ksuid format was created in house at [Cuvva](https://github.com/cuvva). The main benefits of a ksuid are; easily sortable by creation time, easily identifiable environment and resource type, and they contain information about which machine they were generated on. (Also, 4,294,967,295 can be generated per environment, per resource type, per process, per second 🎉).
+Handles parsing and generating of Cuvva standard K-sortable unique identifiers, also know as a `ksuid`. This ksuid format was created in house at [Cuvva](https://github.com/cuvva).
+
+The main benefits of a ksuid are; easily sortable by creation time, easily identifiable environment and resource type, and they contain information about which machine they were generated on. (Also, 4,294,967,295 can be generated per environment, per resource type, per process, per second 🎉).
 
 ## Installation
 
@@ -49,7 +51,7 @@ The machine address and process id format had been decided and is explained belo
 | name | type | length | example | description |
 | ---- | ---- | ------ | ------- | ----------- |
 | Machine address | `byte[]` | `0x06` | `[ 0x8c, 0x85, 0x90, 0x1b, 0x18, 0x9c ]` | An operational, non-loopback physical machine address. |
-| Process id | `uint16` | `0x02` | `21741` | The process id of the process generating the id. As process id's are not 16 bit, the following is applied before it is written `pid % 2 ** 16`. |
+| Process Id | `uint16` | `0x02` | `21741` | The process id of the process generating the id. As process id's are not 16 bit, the following is applied before it is written `pid % 2 ** 16`. |
 
 
 ## Usage
