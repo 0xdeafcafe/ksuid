@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.26124.0
 MinimumVisualStudioVersion = 15.0.26124.0
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ksuid", "Ksuid\Ksuid.csproj", "{F7A18E7E-2969-4B7A-B35F-2F55E0E2C1FC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ksuid.Tests", "Ksuid.Tests\Ksuid.Tests.csproj", "{D9988B20-5E32-41FB-B8AD-E1A97427FAD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ksuid.Test", "Ksuid.Test\Ksuid.Test.csproj", "{D9988B20-5E32-41FB-B8AD-E1A97427FAD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
