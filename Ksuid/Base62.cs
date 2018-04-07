@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+// Make internals visible to the testing lib.
+[assembly:InternalsVisibleTo("Ksuid.Test")]
 
 namespace Ksuid
 {
