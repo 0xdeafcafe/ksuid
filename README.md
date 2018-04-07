@@ -6,7 +6,7 @@ The main benefits of a ksuid are; easily sortable by creation time, easily ident
 
 ## Installation
 
-Available on [NuGet](https://www.nuget.org/packages/ksuid/)
+Soon, available on [NuGet](https://www.nuget.org/packages/ksuid/)
 
 Visual Studio:
 
