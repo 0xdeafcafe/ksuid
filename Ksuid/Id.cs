@@ -60,6 +60,24 @@ namespace Ksuid
 		private string friendlyStr;
 
 		/// <summary>
+		/// Checks of the environment of the ksuid.
+		/// </summary>
+		/// <param name="env">The environment to compare with.</param>
+		public bool IsEnvironment(string env)
+		{
+			return String.Equals(Environment, env);
+		}
+
+		/// <summary>
+		/// Checks of the resource of the ksuid.
+		/// </summary>
+		/// <param name="resource">The resource to compare with.</param>
+		public bool IsResource(string resource)
+		{
+			return String.Equals(Resource, resource);
+		}
+
+		/// <summary>
 		/// Gets the string representation of the ksuid.
 		/// </summary>
 		public override string ToString()
