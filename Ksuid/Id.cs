@@ -122,7 +122,15 @@ namespace Ksuid
 
 			var id = (Id)obj;
 
-			return id.ToString() == this.ToString();
+			return ToString() == this.ToString();
+		}
+
+		/// <summary>
+		/// Gets the hash code of the `ToString` result.
+		/// </summary>
+		public override int GetHashCode()
+		{
+			return ToString().GetHashCode();
 		}
 
 		/// <summary>
