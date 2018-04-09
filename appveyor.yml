@@ -17,18 +17,16 @@ build_script:
 after_build:
   # For once the build has completed
 artifacts:
- - path: '\Ksuid\bin\Release'
-   name: Ksuid
-   type: NuGetPackage
+ - path: './**/*.nupkg'
+   name: nuget
 clone_depth: 1
 test_script:
   # run the unit tests (requires changing into the test directory)
   - cmd: cd ./Ksuid.Test
   - cmd: dotnet test /p:CollectCoverage=true
 deploy:
-  - provider: NuGet
-  - api_key:
-    - secure: zaW5ST/XUeFQXB2BDCtWUnunJrKsRSfrI2pJF47CyVnCII2OqlyTlrwNhDd4d7vq
-  - skip_symbols: false
-  - symbol_server:
-  - artifact: /.*\.nupkg/
+ - provider: NuGet
+   api_key:
+    secure: e8liZGFZ7sw7BAGsR3DtdBgbgPbSF/Bb50dxMCXV5lEC3/RLTnXDPWgoOHsjwP+1
+   skip_symbols: true
+   artifact: nuget

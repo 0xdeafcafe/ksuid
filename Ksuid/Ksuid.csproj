@@ -2,6 +2,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>latest</LangVersion>
-    <VersionPrefix>1.0.0</VersionPrefix>
+    <VersionPrefix>1.0.1</VersionPrefix>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PackageId>cuvva-ksuid</PackageId>
+    <PackageProjectUrl>https://github.com/0xdeafcafe/ksuid</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/0xdeafcafe/ksuid/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 </Project>

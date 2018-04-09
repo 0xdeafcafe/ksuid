@@ -89,6 +89,7 @@ namespace Ksuid
 
 			sb.Append(Environment == "prod" ? "" : $"{Environment}_");
 			sb.Append(Resource);
+			sb.Append("_");
 
 			var decoded = new byte[Constants.DecodedLength];
 			var timestamp = BitConverter.GetBytes(Timestamp);

@@ -6,18 +6,18 @@ The main benefits of a ksuid are; easily sortable by creation time, easily ident
 
 ## Installation
 
-Soon, available on [NuGet](https://www.nuget.org/packages/ksuid/)
+Available on [NuGet](https://www.nuget.org/packages/cuvva-ksuid/).
 
 Visual Studio:
 
 ```powershell
-PM> Install-Package ksuid
+PM> Install-Package cuvva-ksuid
 ```
 
 .NET Core CLI:
 
 ```bash
-dotnet add package ksuid
+dotnet add package cuvva-ksuid
 ```
 
 ## Structure
@@ -61,6 +61,14 @@ using Ksuid;
 
 // Parsing a ksuid
 var parsed = Id.Parse("user_000000BPL4RZaImj5irv0RM56z6Ce");
+
+// Check Id's environment
+parsed.IsEnvironment("prod");
+// - true
+
+// Check Id's resource
+parsed.IsResource("client");
+// - false
 
 // Generating a ksuid, using the singleton
 Node.Singleton.Generate("user");
