@@ -186,6 +186,9 @@ namespace Ksuid
 
 			var env = match.Groups[1].Value;
 
+			if (match.Groups[1].Value == "prod")
+				throw new FormatException("Production environment is implied. Remove \"prod_\".");
+
 			return (
 				String.IsNullOrEmpty(env) ? "prod" : env,
 				match.Groups[2].Value,
