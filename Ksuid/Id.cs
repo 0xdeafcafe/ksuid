@@ -85,10 +85,12 @@ namespace Ksuid
 			if (str != null)
 				return str;
 
-			var env = Environment == "prod" ? "" : $"{Environment}_";
-			var prefix = $"{env}{Resource}_";
-			var decoded = new byte[Constants.DecodedLength];
+			var sb = new StringBuilder();
 
+			sb.Append(Environment == "prod" ? "" : $"{Environment}_");
+			sb.Append(Resource);
+
+			var decoded = new byte[Constants.DecodedLength];
 			var timestamp = BitConverter.GetBytes(Timestamp);
 			var instance = InstanceIdentifier.ToByteArray();
 			var sequenceId = BitConverter.GetBytes(SequenceId);
@@ -103,7 +105,9 @@ namespace Ksuid
 			Array.Copy(instance, 0, decoded, 8, 9);
 			Array.Copy(sequenceId, 0, decoded, 17, 4);
 
-			return str = prefix + Base62.Encode(decoded).PadLeft(Constants.EncodedLength, '0');
+			sb.Append(Base62.Encode(decoded).PadLeft(Constants.EncodedLength, '0'));
+
+			return str = sb.ToString();
 		}
 
 		/// <summary>
