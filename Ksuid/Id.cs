@@ -111,6 +111,21 @@ namespace Ksuid
 		}
 
 		/// <summary>
+		/// Compares the environment, resource, and the content of the payload of a kusid.
+		/// </summary>
+		/// <param name="obj"></param>
+		/// <returns></returns>
+		public override bool Equals(object obj)
+		{
+			if (!(obj is Id))
+				return false;
+
+			var id = (Id)obj;
+
+			return id.ToString() == this.ToString();
+		}
+
+		/// <summary>
 		///
 		/// </summary>
 		/// <returns></returns>
