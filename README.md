@@ -62,6 +62,14 @@ using Ksuid;
 // Parsing a ksuid
 var parsed = Id.Parse("user_000000BPL4RZaImj5irv0RM56z6Ce");
 
+// Check Id's environment
+parsed.IsEnvironment("prod");
+// - true
+
+// Check Id's resource
+parsed.IsResource("client");
+// - false
+
 // Generating a ksuid, using the singleton
 Node.Singleton.Generate("user");
 // - user_000000BPLEn4f9U9TM0eJKi9VNVcu
