@@ -154,55 +154,5 @@ namespace Ksuid
 
 			return friendlyStr = sb.ToString();
 		}
-
-		/// <summary>
-		/// Parses a ksuid.
-		/// </summary>
-		/// <param name="id">The string representation of the ksuid.</param>
-		public static Id Parse(string input)
-		{
-			var parts = splitPrefix(input);
-			var decoded = Base62.Decode(parts.payload);
-
-			var timestamp = new byte[8];
-			var instance = new byte[9];
-			var sequence = new byte[4];
-
-			Array.Copy(decoded, timestamp, 8);
-			Array.Copy(decoded, 8, instance, 0, 9);
-			Array.Copy(decoded, 17, sequence, 0, 4);
-
-			if (BitConverter.IsLittleEndian)
-			{
-				Array.Reverse(timestamp);
-				Array.Reverse(sequence);
-			}
-
-			return new Id(
-				parts.environment,
-				parts.resource,
-				BitConverter.ToUInt64(timestamp, 0),
-				new InstanceIdentifier(instance),
-				BitConverter.ToUInt32(sequence, 0)
-			);
-		}
-
-		private static (string environment, string resource, string payload) splitPrefix(string input)
-		{
-			var match = Constants.KsuidRegex.Match(input);
-			if (!match.Success || match.Groups.Count != 4)
-				throw new FormatException("Ksuid format is invalid");
-
-			var env = match.Groups[1].Value;
-
-			if (match.Groups[1].Value == "prod")
-				throw new FormatException("Production environment is implied. Remove \"prod_\".");
-
-			return (
-				String.IsNullOrEmpty(env) ? "prod" : env,
-				match.Groups[2].Value,
-				match.Groups[3].Value
-			);
-		}
 	}
 }

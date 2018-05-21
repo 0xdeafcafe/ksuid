@@ -3,7 +3,7 @@ using Xunit;
 
 namespace Ksuid.Test
 {
-	public class TestId
+	public class TestKsuid
 	{
 		[Theory]
 		[InlineData(
@@ -26,7 +26,7 @@ namespace Ksuid.Test
 		)]
 		public void ParseWithoutEnvironment(string id, string env, string res, ulong ts, InstanceScheme sc, byte[] ib, uint seq)
 		{
-			var parsedId = Id.Parse(id);
+			var parsedId = Ksuid.Parse(id);
 
 			Assert.Equal(env, parsedId.Environment);
 			Assert.Equal(res, parsedId.Resource);
@@ -57,7 +57,7 @@ namespace Ksuid.Test
 		)]
 		public void ParseWithEnvironment(string id, string env, string res, ulong ts, InstanceScheme sc, byte[] ib, uint seq)
 		{
-			var parsedId = Id.Parse(id);
+			var parsedId = Ksuid.Parse(id);
 
 			Assert.Equal(env, parsedId.Environment);
 			Assert.Equal(res, parsedId.Resource);
@@ -70,7 +70,7 @@ namespace Ksuid.Test
 		[Fact]
 		public void ParseWithProdEnvironment()
 		{
-			Assert.Throws<FormatException>(() => Id.Parse("prod_testing_000000BPL4RZaImj5irv0RM56z6Ce"));
+			Assert.Throws<FormatException>(() => Ksuid.Parse("prod_testing_000000BPL4RZaImj5irv0RM56z6Ce"));
 		}
 
 		[Theory]
@@ -80,19 +80,19 @@ namespace Ksuid.Test
 		[InlineData("ReSouRCe)")]
 		public void ParseWithInvalidResource(string resource)
 		{
-			Assert.Throws<FormatException>(() => Id.Parse($"{resource}000000BPL4RZaImj5irv0RM56z6Ce"));
+			Assert.Throws<FormatException>(() => Ksuid.Parse($"{resource}000000BPL4RZaImj5irv0RM56z6Ce"));
 		}
 
 		[Fact]
 		public void ParseNull()
 		{
-			Assert.Throws<ArgumentNullException>(() => Id.Parse(null));
+			Assert.Throws<ArgumentNullException>(() => Ksuid.Parse(null));
 		}
 
 		[Fact]
 		public void ParseInvalidPayload()
 		{
-			Assert.Throws<FormatException>(() => Id.Parse("test_000000BPG296UCnyv841TMQvmOhq!"));
+			Assert.Throws<FormatException>(() => Ksuid.Parse("test_000000BPG296UCnyv841TMQvmOhq!"));
 		}
 
 		[Theory]
@@ -100,7 +100,7 @@ namespace Ksuid.Test
 		[InlineData("test_000000BPG296UCnyv841TMQvmOhq")]
 		public void ParseInvalidLength(string id)
 		{
-			Assert.Throws<FormatException>(() => Id.Parse(id));
+			Assert.Throws<FormatException>(() => Ksuid.Parse(id));
 		}
 	}
 }

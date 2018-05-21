@@ -63,6 +63,9 @@ namespace Ksuid
 		/// </summary>
 		private UInt64 lastTimestamp = 0;
 
+		/// <summary>
+		/// The mutex used to lock while the sequence is incremented.
+		/// </summary>
 		private Mutex mutex = new Mutex();
 
 		/// <summary>
