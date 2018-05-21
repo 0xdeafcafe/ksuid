@@ -68,22 +68,22 @@ Random instance identifiers are just a series of 8 cryptographically random byte
 using Ksuid;
 
 // Parsing a ksuid
-var parsed = Id.Parse("user_000000BPL4RZaImj5irv0RM56z6Ce");
+var parsed = Ksuid.Parse("user_000000BPL4RZaImj5irv0RM56z6Ce");
 
-// Check Id's environment
+// Check the parsed ID's environment
 parsed.IsEnvironment("prod");
 // - true
 
-// Check Id's resource
+// Check the parsed ID's resource
 parsed.IsResource("client");
 // - false
 
-// Generating a ksuid, using the singleton
-Node.Singleton.Generate("user");
+// Generating a KSUID, using the singleton
+Ksuid.Generate("user");
 // - user_000000BPLEn4f9U9TM0eJKi9VNVcu
 
 // Setting the environment of the singleton node
-Node.Singleton.Environment = "dev";
+Ksuid.Environment = "dev";
 
 // Creating a new, non singleton node for the development environment.
 var node = new Node("dev");
